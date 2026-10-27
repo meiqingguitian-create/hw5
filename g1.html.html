@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="2016–2025 年台灣、越南、泰國年度入境旅客統計 Highcharts 互動式折線圖，數據來自使用者提供的 Excel。">
+  <title>2016–2025 台灣、越南、泰國 Inbound 統計趨勢｜Highcharts</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --background: #f4f7fb;
+      --surface: #ffffff;
+      --text: #19314a;
+      --muted: #66758a;
+      --blue: #2878dc;
+      --orange: #ef8750;
+      --teal: #13a891;
+      --border: #e2eaf3;
+      --soft: #f3f7fc;
+      --shadow: 0 12px 35px rgba(31, 62, 108, .08);
+    }
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      background: var(--background);
+      color: var(--text);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans TC", Roboto,
+        Helvetica, Arial, sans-serif;
+      line-height: 1.6;
+    }
+    main { max-width: 1100px; margin: 0 auto; padding: 40px 20px 72px; }
+    .eyebrow { display: inline-block; color: #2869b1; font-size: .83rem; font-weight: 750;
+      letter-spacing: .12em; margin: 0 0 8px; text-transform: uppercase; }
+    h1 { margin: 0 0 8px; font-weight: 780; font-size: clamp(1.5rem, 3.3vw, 2.35rem); line-height: 1.35; }
+    .intro { margin: 0 0 26px; color: var(--muted); font-size: 1rem; }
+    .chart-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      padding: 26px 24px 19px;
+      box-shadow: var(--shadow);
+    }
+    .highcharts-figure { margin: 0; min-width: 0; max-width: none; }
+    #container { width: 100%; height: 485px; }
+    .highcharts-description {
+      background: #f2f7fd;
+      border-left: 3px solid #4d8edc;
+      border-radius: 0 6px 6px 0;
+      padding: 12px 16px;
+      margin: 16px 0 0;
+      color: #48617b;
+      font-size: .88rem;
+      font-style: normal;
+    }
+    .key { margin-top: 19px; display: flex; flex-wrap: wrap; gap: 10px; }
+    .key span { font-size: .84rem; border: 1px solid var(--border); padding: 6px 11px; border-radius: 30px;
+      background: #fff; color: #4b5e75; }
+    .dot { display:inline-block; width: 9px; height: 9px; margin-right: 7px; border-radius: 50%; vertical-align: baseline; }
+    .details { background: var(--surface); margin-top: 18px; border: 1px solid var(--border);
+      border-radius: 14px; overflow: hidden; }
+    .details summary { padding: 17px 21px; cursor: pointer; font-weight: 680; list-style-position: inside; }
+    .details summary:hover { background: var(--soft); }
+    .details[open] summary { border-bottom: 1px solid var(--border); }
+    .details-note { color:var(--muted); margin: 13px 21px 8px; font-size: .86rem; }
+    .scroll-table { overflow-x: auto; padding: 0 12px 13px; }
+    table { border-collapse: collapse; width: 100%; font-size: .91rem; white-space: nowrap; }
+    th, td { padding: 10px 13px; text-align: right; border-bottom: 1px solid #eaf0f6; }
+    th { color: #2b4b68; font-weight: 700; }
+    thead { background: #eff5fc; }
+    tbody tr:nth-child(even) { background: #fafcff; }
+    tbody tr:hover { background: #e9f3ff; }
+    thead th:first-child, tbody th:first-child { text-align: left; }
+    .source-table th, .source-table td { white-space: normal; text-align: left; min-width: 95px; font-size: .82rem; }
+    .source-table th:nth-child(3), .source-table td:nth-child(3) { min-width: 245px; }
+    .source-table th:nth-child(4), .source-table td:nth-child(4) { min-width: 260px; }
+    a { color: #1870c5; text-underline-offset: 3px; }
+    .notes { margin-top: 18px; color: #5e7086; font-size: .88rem; padding: 0 4px; }
+    .notes strong { color: #2b4a67; }
+    .notes p { margin: .45em 0; }
+    .chart-fallback { min-height: 380px; display:flex; align-items:center; justify-content:center; padding:18px;
+      color: #7a4e16; background:#fff9ee; border: 1px dashed #e2bb75; border-radius:10px; text-align:center; }
+    .highcharts-tooltip table { border-collapse: collapse; width: auto; min-width: 230px; font-size: 12px; }
+    .highcharts-tooltip caption { font-size: 13px; font-weight: 700; padding: .55em 0; 
+      border-bottom: 1px solid #dce6f0; text-align: left; }
+    .highcharts-tooltip th { font-weight: 500; color: #53657b; padding: 5px 9px 5px 1px; text-align: left; }
+    .highcharts-tooltip td { font-weight: 700; padding: 5px 2px 5px 12px; text-align: right; color: #19314a; }
+    .highcharts-data-table table { margin: 10px auto; width: 100%; border-collapse: collapse; }
+    @media (max-width: 650px) {
+      main { padding: 24px 12px 40px; }
+      .chart-card { padding: 16px 8px 18px; border-radius: 13px; }
+      #container { height: 420px; }
+      .highcharts-description { margin: 12px 8px 0; }
+      .key { margin: 16px 6px; gap: 8px; }
+      .details summary { padding: 14px 13px; }
+      table { font-size: .83rem; }
+    }
+    @media print {
+      body { background:white; }
+      main { max-width:none; padding: 0; }
+      .chart-card { box-shadow:none; }
+      .details { break-inside: avoid; }
+      .details:not([open]) { display:none; }
+    }
+  </style>
+  <!-- HTML/CSS/業務邏輯都在本檔；唯 Highcharts 套件由官方 CDN 載入。 -->
+  <script src="https://code.highcharts.com/highcharts.js"></script>
+  <script src="https://code.highcharts.com/modules/series-label.js"></script>
+  <script src="https://code.highcharts.com/modules/exporting.js"></script>
+  <script src="https://code.highcharts.com/modules/export-data.js"></script>
+  <script src="https://code.highcharts.com/modules/accessibility.js"></script>
+</head>
+<body>
+<main>
+  <header>
+    <p class="eyebrow">Inbound tourism · 2016–2025</p>
+    <h1>台灣、越南、泰國｜10 年入境旅客趨勢</h1>
+    <p class="intro">以年為單位的官方公布實際數值比較，單位：人次。點選圖例可顯示或隱藏國家，移動滑鼠可查看精確數字。</p>
+  </header>
+  <section class="chart-card" aria-label="年度旅客趨勢折線圖">
+    <figure class="highcharts-figure">
+      <div id="container" aria-label="2016年至2025年台灣越南泰國旅客年度趨勢圖"></div>
+      <figcaption class="highcharts-description">
+        三條折線沿用你提供的 Highcharts 範例視覺形式。台灣及越南採入境旅客數；
+        <strong>泰國採入境過夜觀光客數（International Tourist Arrivals）</strong>，
+        因此三組數列並非完全相同的旅客統計口徑。
+      </figcaption>
+    </figure>
+    <div class="key" aria-label="統計數列說明">
+      <span><i class="dot" style="background:var(--blue)"></i>台灣：Visitor Arrivals</span>
+      <span><i class="dot" style="background:var(--orange)"></i>越南：International Visitors</span>
+      <span><i class="dot" style="background:var(--teal)"></i>泰國：Tourist Arrivals（過夜）</span>
+    </div>
+  </section>
+  <details class="details">
+    <summary>查看 2016–2025 完整數據表（30 筆）</summary>
+    <p class="details-note">直接擷取自所附 Excel 的「年度數據」工作表，未更動任何數字。</p>
+    <div class="scroll-table">
+      <table aria-label="台灣越南泰國每年旅客人次">
+        <thead><tr><th scope="col">年份</th><th scope="col">台灣（人次）</th><th scope="col">越南（人次）</th><th scope="col">泰國（人次）</th></tr></thead>
+        <tbody>
+          <tr><th scope="row">2016</th><td>10,690,279</td><td>10,012,735</td><td>32,529,588</td></tr>
+<tr><th scope="row">2017</th><td>10,739,601</td><td>12,922,151</td><td>35,591,978</td></tr>
+<tr><th scope="row">2018</th><td>11,066,707</td><td>15,497,791</td><td>38,178,194</td></tr>
+<tr><th scope="row">2019</th><td>11,864,105</td><td>18,008,591</td><td>39,916,251</td></tr>
+<tr><th scope="row">2020</th><td>1,377,861</td><td>3,837,300</td><td>6,702,396</td></tr>
+<tr><th scope="row">2021</th><td>140,479</td><td>157,300</td><td>427,869</td></tr>
+<tr><th scope="row">2022</th><td>895,962</td><td>3,661,222</td><td>11,065,226</td></tr>
+<tr><th scope="row">2023</th><td>6,486,951</td><td>12,602,434</td><td>28,150,016</td></tr>
+<tr><th scope="row">2024</th><td>7,857,686</td><td>17,583,901</td><td>35,545,714</td></tr>
+<tr><th scope="row">2025</th><td>8,574,547</td><td>21,168,291</td><td>32,974,321</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </details>
+  <details class="details">
+    <summary>查看逐筆官方來源與資料狀態（30 筆）</summary>
+    <p class="details-note">內容取自所附 Excel「逐筆來源」工作表；來源網址可直接點開。</p>
+    <div class="scroll-table">
+      <table class="source-table" aria-label="數據來源與狀態">
+        <thead><tr><th>年份</th><th>地區</th><th>官方指標名稱</th><th>發布狀態／數據精度</th><th>來源連結</th></tr></thead>
+        <tbody>
+          <tr><th scope="row">2016</th><td>台灣</td><td>Visitor Arrivals</td><td>已公布年度實際值</td><td><a href="https://admin.taiwan.net.tw/fapi/AttFile?id=23843&amp;type=AttFile" target="_blank" rel="noopener noreferrer">開啟官方來源 ↗</a></td></tr>
+<tr><th scope="row">2016</th><td>越南</td><td>Khách quốc tế đến Việt Nam</td><td>已公布年度實際值（精確人次）</td><td><a href="https://images.vietnamtourism.gov.vn/vn/dmdocuments/2021/bao_cao_thuong_nien_2018_final.pdf" target="_blank" rel="noopener noreferrer">開啟官方來源 ↗</a></td></tr>
+<tr><th scope="row">2016</th><td>泰國</td><td>International Tourist Arrivals (overnight)</td><td>MOTS 已發布年度值；2019 曾修訂</td><td><a href="https://www.mots.go.th/news/category/655" target="_blank" rel="noopener noreferrer">開啟官方來源 ↗</a></td></tr>
+<tr><th scope="row">2017</th><td>台灣</td><td>Visitor Arrivals</td><td>已公布年度實際值</td><td><a href="https://admin.taiwan.net.tw/fapi/AttFile?id=23843&amp;type=AttFile" target="_blank" rel="noopener noreferrer">開啟官方來源 ↗</a></td></tr>
+<tr><th scope="row">2017</th><td>越南</td><td>Khách quốc tế đến Việt Nam</td><td>已公布年度實際值（精確人次）</td><td><a href="https://images.vietnamtourism.gov.vn/vn/dmdocuments/2021/bao_cao_thuong_nien_2018_final.pdf" target="_blank" rel="noopener noreferrer">開啟官方來源 ↗</a></td></tr>
+<tr><th scope="row">2017</th><td>泰國</td><td>International Tourist Arrivals (overnight)</td><td>MOTS 已發布年度值；2019 曾修訂</td><td><a href="https://www.mots.go.th/news/category/655" target="_blank" rel="noopener noreferrer">開啟官方來源 ↗</a></td></tr>
+<tr><th scope="row">2018</th><td>台灣</td><td>Visitor Arrivals</td><td>已公布年度實際值</td><td><a href="https://admin.taiwan.net.tw/fapi/AttFile?id=23843&amp;type=AttFile" target="_blank" rel="noopener noreferrer">開啟官方來源 ↗</a></td></tr>
+<tr><th scope="row">2018</th><td>越南</td><td>Khách quốc tế đến Việt Nam</td><td>已公布年度實際值（精確人次）</td><td><a href="https://images.vietnamtourism.gov.vn/vn/dmdocuments/2021/bao_cao_thuong_nien_2018_final.pdf" target="_blank" rel="noopener noreferrer">開啟官方來源 ↗</a></td></tr>
+<tr><th scope="row">2018</th><td>泰國</td><td>International Tourist Arrivals (overnight)</td><td>MOTS 已發布年度值；2019 曾修訂</td><td><a href="https://www.mots.go.th/news/category/655" target="_blank" rel="noopener noreferrer">開啟官方來源 ↗</a></td></tr>
+<tr><th scope="row">2019</th><td>台灣</td><td>Visitor Arrivals</td><td>已公布年度實際值</td><td><a href="https://admin.taiwan.net.tw/fapi/AttFile?id=23843&amp;type=AttFile" target="_blank" rel="noopener noreferrer">開啟官方來源 ↗</a></td></tr>
+<tr><th scope="row">2019</th><td>越南</td><td>International visitors to Viet Nam</td><td>已公布年度實際值（精確人次）</td><td><a href="https://www.nso.gov.vn/du-lieu-va-so-lieu-thong-ke/2019/12/bao-cao-tinh-hinh-kinh-te-xa-hoi-quy-iv-va-nam-2019/" target="_blank" rel="noopener noreferrer">開啟官方來源 ↗</a></td></tr>
+<tr><th scope="row">2019</th><td>泰國</td><td>International Tourist Arrivals (overnight)</td><td>MOTS 已發布年度值；2019 曾修訂</td><td><a href="https://www.mots.go.th/news/category/655" target="_blank" rel="noopener noreferrer">開啟官方來源 ↗</a></td></tr>
+<tr><th scope="row">2020</th><td>台灣</td><td>Visitor Arrivals</td><td>已公布年度實際值</td><td><a href="https://stat.moc.gov.tw/ImportantPointer_LatestDownload.aspx?sqno=58" target="_blank" rel="noopener noreferrer">開啟官方來源 ↗</a></td></tr>
+<tr><th scope="row">2020</th><td>越南</td><td>Khách quốc tế đến Việt Nam</td><td>官方公布 3,837.3 千人次（換算至百人次）</td><td><a href="https://www.nso.gov.vn/du-lieu-va-so-lieu-thong-ke/2020/12/thong-cao-bao-chi-ve-tinh-hinh-kinh-te-xa-hoi-quy-iv-va-nam-2020/" target="_blank" rel="noopener noreferrer">開啟官方來源 ↗</a></td></tr>
+<tr><th scope="row">2020</th><td>泰國</td><td>International Tourist Arrivals (overnight)</td><td>MOTS 已發布年度值；部分年度標 provisional</td><td><a href="https://www.mots.go.th/news/category/655" target="_blank" rel="noopener noreferrer">開啟官方來源 ↗</a></td></tr>
+<tr><th scope="row">2021</th><td>台灣</td><td>Visitor Arrivals</td><td>已公布年度實際值</td><td><a href="https://stat.moc.gov.tw/ImportantPointer_LatestDownload.aspx?sqno=58" target="_blank" rel="noopener noreferrer">開啟官方來源 ↗</a></td></tr>
+<tr><th scope="row">2021</th><td>越南</td><td>Number of foreigners entry of Viet Nam</td><td>官方公布 157.3 千人次（換算至百人次）</td><td><a href="https://www.nso.gov.vn/wp-content/uploads/2026/01/Nien-giam-tom-tat-2024.pdf" target="_blank" rel="noopener noreferrer">開啟官方來源 ↗</a></td></tr>
+<tr><th scope="row">2021</th><td>泰國</td><td>International Tourist Arrivals (overnight)</td><td>MOTS 已發布年度值；部分年度標 provisional</td><td><a href="https://www.mots.go.th/news/category/655" target="_blank" rel="noopener noreferrer">開啟官方來源 ↗</a></td></tr>
+<tr><th scope="row">2022</th><td>台灣</td><td>Visitor Arrivals</td><td>已公布年度實際值</td><td><a href="https://stat.moc.gov.tw/ImportantPointer_LatestDownload.aspx?sqno=58" target="_blank" rel="noopener noreferrer">開啟官方來源 ↗</a></td></tr>
+<tr><th scope="row">2022</th><td>越南</td><td>International visitors (code 1501)</td><td>官方統計逐月累計（非預測）</td><td><a href="https://vietnamtourism.gov.vn/en/statistic/international" target="_blank" rel="noopener noreferrer">開啟官方來源 ↗</a></td></tr>
+<tr><th scope="row">2022</th><td>泰國</td><td>International Tourist Arrivals (overnight)</td><td>MOTS 已發布年度值；部分年度標 provisional</td><td><a href="https://www.mots.go.th/news/category/655" target="_blank" rel="noopener noreferrer">開啟官方來源 ↗</a></td></tr>
+<tr><th scope="row">2023</th><td>台灣</td><td>Visitor Arrivals</td><td>已公布年度實際值</td><td><a href="https://stat.moc.gov.tw/ImportantPointer_LatestDownload.aspx?sqno=58" target="_blank" rel="noopener noreferrer">開啟官方來源 ↗</a></td></tr>
+<tr><th scope="row">2023</th><td>越南</td><td>International visitors (code 1501)</td><td>官方統計逐月累計（非預測）</td><td><a href="https://vietnamtourism.gov.vn/en/statistic/international" target="_blank" rel="noopener noreferrer">開啟官方來源 ↗</a></td></tr>
+<tr><th scope="row">2023</th><td>泰國</td><td>International Tourist Arrivals (overnight)</td><td>MOTS 已發布年度值；部分年度標 provisional</td><td><a href="https://www.mots.go.th/news/category/655" target="_blank" rel="noopener noreferrer">開啟官方來源 ↗</a></td></tr>
+<tr><th scope="row">2024</th><td>台灣</td><td>Visitor Arrivals</td><td>已公布年度實際值</td><td><a href="https://stat.moc.gov.tw/ImportantPointer_LatestDownload.aspx?sqno=58" target="_blank" rel="noopener noreferrer">開啟官方來源 ↗</a></td></tr>
+<tr><th scope="row">2024</th><td>越南</td><td>International visitors (code 1501)</td><td>官方統計逐月累計（非預測）</td><td><a href="https://vietnamtourism.gov.vn/en/statistic/international" target="_blank" rel="noopener noreferrer">開啟官方來源 ↗</a></td></tr>
+<tr><th scope="row">2024</th><td>泰國</td><td>International Tourist Arrivals (overnight)</td><td>MOTS 已發布年度值；部分年度標 provisional</td><td><a href="https://www.mots.go.th/news/category/655" target="_blank" rel="noopener noreferrer">開啟官方來源 ↗</a></td></tr>
+<tr><th scope="row">2025</th><td>台灣</td><td>Visitor Arrivals</td><td>已公布年度實際值</td><td><a href="https://admin.taiwan.net.tw/english/info/IssuePage?a=18095" target="_blank" rel="noopener noreferrer">開啟官方來源 ↗</a></td></tr>
+<tr><th scope="row">2025</th><td>越南</td><td>International visitors (code 1501)</td><td>官方統計逐月累計（非預測）</td><td><a href="https://vietnamtourism.gov.vn/en/statistic/international" target="_blank" rel="noopener noreferrer">開啟官方來源 ↗</a></td></tr>
+<tr><th scope="row">2025</th><td>泰國</td><td>International Tourist Arrivals (overnight)</td><td>政府公布 2025 完整年度；屬官方實際值</td><td><a href="https://radiophrae.prd.go.th/th/content/category/detail/id/2859/iid/461603" target="_blank" rel="noopener noreferrer">開啟官方來源 ↗</a></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </details>
+  <footer class="notes">
+    <p><strong>資料依據：</strong>你上傳的 <code>excel.xlsx</code>，工作表「年度數據」、「逐筆來源」、「定義與查核」。</p>
+    <p><strong>精度提醒：</strong>越南 2020–2021 原始發布值為「千人次」，Excel 已換算為人次；2025 部分數值為官方已公布的實際統計，日後仍可能修訂。</p>
+    <p><strong>圖表使用：</strong>右上角 Highcharts 選單可下載圖片或 CSV；本 HTML 不需附帶其他自製 CSS、JS、Excel 檔案，但需連網載入 Highcharts 程式庫。</p>
+  </footer>
+</main>
+<script>
+  "use strict";
+  // 以下數值逐格擷取自 Excel「年度數據」A6:D15，並非推估資料。
+  const annualData = [{"year":2016,"taiwan":10690279,"vietnam":10012735,"thailand":32529588},{"year":2017,"taiwan":10739601,"vietnam":12922151,"thailand":35591978},{"year":2018,"taiwan":11066707,"vietnam":15497791,"thailand":38178194},{"year":2019,"taiwan":11864105,"vietnam":18008591,"thailand":39916251},{"year":2020,"taiwan":1377861,"vietnam":3837300,"thailand":6702396},{"year":2021,"taiwan":140479,"vietnam":157300,"thailand":427869},{"year":2022,"taiwan":895962,"vietnam":3661222,"thailand":11065226},{"year":2023,"taiwan":6486951,"vietnam":12602434,"thailand":28150016},{"year":2024,"taiwan":7857686,"vietnam":17583901,"thailand":35545714},{"year":2025,"taiwan":8574547,"vietnam":21168291,"thailand":32974321}];
+  const years = annualData.map(r => String(r.year));
+  const millions = v => (v / 1000000).toFixed(0) + "M";
+
+  if (typeof Highcharts === "undefined") {
+    document.getElementById("container").innerHTML =
+      '<div class="chart-fallback">目前無法載入 Highcharts。請確認網路連線。<br>下方「完整數據表」仍可正常查閱。</div>';
+  } else {
+    Highcharts.setOptions({
+      lang: {
+        thousandsSep: ",",
+        decimalPoint: ".",
+        contextButtonTitle: "圖表下載與資料選單",
+        downloadPNG: "下載 PNG 圖片",
+        downloadJPEG: "下載 JPEG 圖片",
+        downloadPDF: "下載 PDF",
+        downloadSVG: "下載 SVG 向量圖",
+        downloadCSV: "下載 CSV 數據",
+        downloadXLS: "下載 XLS 數據",
+        viewData: "檢視資料表",
+        hideData: "隱藏資料表",
+        printChart: "列印圖表"
+      }
+    });
+    Highcharts.chart("container", {
+      chart: {
+        type: "line",
+        backgroundColor: "#ffffff",
+        plotBorderColor: "#e6ebf2",
+        plotBorderWidth: 1,
+        plotBorderRadius: 5,
+        spacingTop: 19,
+        spacingRight: 15,
+        spacingBottom: 15,
+        spacingLeft: 12,
+        style: {
+          fontFamily: '-apple-system,BlinkMacSystemFont,"Segoe UI","Noto Sans TC",Arial,sans-serif'
+        }
+      },
+      title: {
+        text: "International Arrivals｜2016–2025",
+        align: "left",
+        style: { color: "#19314a", fontSize: "20px", fontWeight: "700" }
+      },
+      subtitle: {
+        text: "年度數據（單位：人次）｜泰國為入境過夜觀光客",
+        align: "left",
+        style: { color: "#66758a", fontSize: "12px" }
+      },
+      credits: { enabled: true },
+      xAxis: {
+        categories: years,
+        crosshair: { color: "#d0e1f4", width: 1 },
+        title: { text: "年份", style: { color: "#566b81" } },
+        tickColor: "#e6e6e6",
+        lineColor: "#d5dfe9",
+        labels: { style: { color: "#657891" } }
+      },
+      yAxis: {
+        min: 0,
+        title: { text: "入境旅客（百萬人次）", style: { color: "#566b81" } },
+        gridLineColor: "#e7eef6",
+        labels: {
+          formatter: function () { return millions(this.value); },
+          style: { color: "#657891" }
+        }
+      },
+      legend: {
+        enabled: true,
+        align: "center",
+        verticalAlign: "bottom",
+        itemStyle: { fontSize: "13px", color: "#304861" },
+        itemHoverStyle: { color: "#1266bf" },
+        symbolRadius: 0
+      },
+      tooltip: {
+        shared: true,
+        useHTML: true,
+        borderRadius: 8,
+        borderColor: "#dbe6f3",
+        shadow: { color: "rgba(13,49,87,0.13)", offsetX: 0, offsetY: 3, opacity: 0.16, width: 7 },
+        formatter: function () {
+          const label = (this.points && this.points.length ? this.points[0].key : this.key);
+          const pts = this.points || [this.point];
+          const content = pts.map(p =>
+            `<tr><th><span style="display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:7px;background:${p.color}"></span>${p.series.name}</th>` +
+            `<td>${Highcharts.numberFormat(p.y, 0, ".", ",")}</td></tr>`
+          ).join("");
+          return `<table><caption>${label} 年</caption>${content}</table>`;
+        }
+      },
+      plotOptions: {
+        series: {
+          lineWidth: 3,
+          marker: { enabled: true, radius: 3, symbol: "circle" },
+          states: { hover: { lineWidthPlus: 1 } },
+          label: { enabled: false },
+          animation: { duration: 600 }
+        }
+      },
+      series: [
+        { name: "台灣", color: "#2878dc", data: annualData.map(r => r.taiwan) },
+        { name: "越南", color: "#ef8750", data: annualData.map(r => r.vietnam) },
+        { name: "泰國（過夜）", color: "#13a891", data: annualData.map(r => r.thailand) }
+      ],
+      exporting: {
+        enabled: true,
+        filename: "Inbound_Taiwan_Vietnam_Thailand_2016-2025",
+        chartOptions: { chart: { backgroundColor: "#ffffff" } }
+      },
+      responsive: {
+        rules: [{
+          condition: { maxWidth: 580 },
+          chartOptions: {
+            title: { style: { fontSize: "16px" } },
+            subtitle: { style: { fontSize: "10px" } },
+            legend: { itemStyle: { fontSize: "11px" } },
+            yAxis: { title: { text: "百萬人次" } },
+            xAxis: { labels: { rotation: -45 } }
+          }
+        }]
+      },
+      accessibility: {
+        description: "2016 到 2025 年三個地區官方公布的年度入境人次折線圖。泰國是過夜觀光客資料，與另兩地的統計口徑不同。"
+      }
+    });
+  }
+</script>
+</body>
+</html>
