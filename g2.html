@@ -1,11 +1,11 @@
 <!DOCTYPE html>
 <html lang="zh-Hant">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="2025年10月至2026年9月來臺旅客按來源地區統計，依 Excel 原始資料製作的 Highcharts 圓餅圖與分析。">
-  <title>2025/10–2026/09 來臺旅客來源地區統計｜Highcharts</title>
-  <style>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="2025年10月至2026年9月來臺旅客五大洲與東協十國國籍統計，兩張 Highcharts 互動圓餅圖及逐月原始資料。">
+<title>2025/10–2026/09 來臺旅客五大洲＋東協十國｜Highcharts 互動統計</title>
+<style>
     :root {
       color-scheme: light;
       --background:#f4f7fb; --surface:#ffffff; --text:#19314a; --muted:#66758a;
@@ -79,22 +79,61 @@
     @media(max-width:800px){.primary-grid{grid-template-columns:1fr}.breakdown-card{padding:23px 24px}.region-list{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));column-gap:25px}#container{height:450px}}
     @media(max-width:600px){main{padding:24px 12px 44px}.stats{gap:8px}.stat{padding:12px 11px}.stat .value{font-size:clamp(1.12rem,4vw,1.4rem)}.stat .label{font-size:.76rem}.stat small{font-size:.71rem}.chart-card{padding:16px 8px 14px;border-radius:13px}#container{height:390px}.highcharts-description{margin:8px 7px 0}.region-list{grid-template-columns:1fr}.analysis-card{padding:20px 17px}.section-heading{align-items:flex-start;flex-direction:column}.analysis-block{grid-template-columns:32px minmax(0,1fr);gap:5px}.analysis-block p{font-size:.91rem}.details summary{padding:14px 13px}table{font-size:.83rem}}
     @media print{body{background:white}main{max-width:none;padding:0}.chart-card,.breakdown-card,.analysis-card{box-shadow:none}.details:not([open]){display:none}.analysis-card{break-inside:avoid}}
-  </style>
-  <!-- CSS、應用程式 JavaScript 和 Excel 數據都內嵌在這個 HTML。
-       圓餅圖只由真正的 Highcharts chart.type = 'pie' 繪製。
-       Highcharts 為第三方程式庫，會在線上載入；沒有靜態圖表替代品。 -->
+  
 
-
-
-
+    /* Combined edition: on-page navigation and second Highcharts section */
+    .page-nav{display:flex;gap:10px;flex-wrap:wrap;margin:0 0 24px}
+    .page-nav a{display:inline-flex;align-items:center;text-decoration:none;color:#2869b1;border:1px solid #d6e6f8;background:#fff;border-radius:999px;padding:9px 17px;font-weight:730;font-size:.9rem;box-shadow:0 4px 12px rgba(26,83,149,.04);transition:background .2s,border-color .2s}
+    .page-nav a:hover,.page-nav a:focus-visible{background:#eaf3ff;border-color:#a9cef6}
+    .feature-heading{display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin:0 0 17px}
+    .feature-number{display:inline-flex;align-items:center;justify-content:center;border-radius:12px;background:#e6f1ff;color:#286cbd;width:44px;height:44px;flex:0 0 44px;font-weight:900}
+    .feature-heading h2{font-size:clamp(1.28rem,2.5vw,1.65rem);margin:0;line-height:1.4}
+    .feature-heading p{margin:1px 0;color:var(--muted);font-size:.91rem}
+    #continents,#asean{scroll-margin-top:22px}
+    .asean-section{border-top:1px solid #d9e4ef;margin-top:33px;padding-top:32px}
+    .asean-intro{font-size:.95rem;margin:0 0 20px;color:#5e7086;max-width:930px}
+    .asean-context{border-left:3px solid #2878dc;border-radius:0 8px 8px 0;background:#eaf3ff;padding:12px 15px;margin:0 0 19px;color:#375b7e;font-size:.93rem;line-height:1.75}
+    .asean-stats{grid-template-columns:repeat(4,minmax(0,1fr))}
+    .toolbar{display:flex;justify-content:space-between;align-items:center;gap:15px;margin-bottom:15px;padding:15px 19px;border:1px solid var(--border);background:#fff;border-radius:14px;flex-wrap:wrap}
+    .toolbar-title{font-weight:730;color:#294766;font-size:.93rem}
+    .toolbar p{margin:1px 0 0;color:#738298;font-size:.81rem}
+    .toolbar-controls{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+    .toolbar label{font-size:.83rem;color:#4a647d;font-weight:650}
+    .toolbar select{padding:9px 35px 9px 11px;border:1px solid #cbd9e9;background:#f8fbff;border-radius:9px;color:#254a6b;font-size:.9rem;min-width:174px;cursor:pointer}
+    .toolbar button{background:#eaf3ff;border:1px solid #d1e4fb;border-radius:9px;color:#246bb8;padding:9px 12px;font-size:.84rem;font-weight:700;cursor:pointer;transition:background .15s}
+    .toolbar button:hover{background:#dbeaff}
+    .toolbar select:focus-visible,.toolbar button:focus-visible,.rank-button:focus-visible{outline:3px solid #a8d0fc;outline-offset:2px}
+    #container-asean{width:100%;height:515px;min-width:0}
+    .chart-loading{min-height:400px;display:flex;align-items:center;justify-content:center;color:#6a7d92;text-align:center;padding:24px;line-height:1.8}
+    .chart-loading.error{min-height:220px;color:#9a3a43;background:#fff7f8;border:1px solid #ffe1e3;border-radius:12px;margin:36px 10px}
+    .chart-caption{border-left:3px solid #4d8edc;border-radius:0 6px 6px 0;background:#f2f7fd;padding:11px 14px;font-size:.86rem;color:#48617b;margin:10px 2px 0}
+    .ranking-list{list-style:none;padding:0;margin:0}
+    .ranking-list li{margin:0 0 6px}
+    .rank-button{display:block;width:100%;text-align:left;background:transparent;border:1px solid transparent;border-radius:9px;padding:7px 9px;cursor:pointer;color:inherit;transition:background .16s,border-color .16s;font:inherit}
+    .rank-button:hover{background:#f4f8fd;border-color:#e4eefa}
+    .rank-head{display:flex;align-items:center;justify-content:space-between;gap:12px;font-size:.88rem}
+    .rank-name{display:flex;align-items:center;gap:9px;font-weight:670;white-space:nowrap}
+    .rank-num{color:#8496ab;font-size:.73rem;font-weight:800;min-width:17px}
+    .rank-dot{width:10px;height:10px;display:inline-block;border-radius:50%;flex:none}
+    .rank-percent{font-variant-numeric:tabular-nums;font-weight:730}
+    .rank-count{color:var(--muted);font-size:.76rem;font-variant-numeric:tabular-nums}
+    .rank-button .bar-track{height:5px;margin:7px 0 2px}
+    .rank-button .bar-fill{height:100%}
+    @media(max-width:1020px){.asean-stats{grid-template-columns:repeat(2,minmax(0,1fr))}}
+    @media(max-width:800px){.ranking-list{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));column-gap:18px}#container-asean{height:510px}}
+    @media(max-width:600px){.page-nav{gap:8px}.page-nav a{padding:8px 11px;font-size:.8rem}.asean-section{padding-top:25px;margin-top:28px}.feature-heading{gap:9px}.feature-number{width:35px;height:35px;flex-basis:35px}.asean-stats{grid-template-columns:repeat(2,minmax(0,1fr))}.toolbar{padding:13px}.toolbar-controls{width:100%}.toolbar select{flex:1;min-width:120px}.ranking-list{grid-template-columns:1fr}#container-asean{height:445px}}
+    @media print{.page-nav,.toolbar{display:none}}
+</style>
 </head>
 <body>
 <main>
-  <header>
+  <header id="continents">
     <p class="eyebrow">INBOUND TOURISM · VISITOR ORIGIN</p>
-    <h1>2025/10–2026/09 來臺旅客來源地區統計</h1>
-    <p class="intro">依原始 Excel「來臺旅客按國籍統計」整理，以圓餅圖呈現亞洲、美洲、歐洲等 6 類來源地區的旅客占比。單位：人次。</p>
+    <h1>2025/10–2026/09 來臺旅客五大洲與東協十國統計</h1>
+    <p class="intro">以原始 Excel 的實際人次，先比較五大洲（另保留「其他未列明」），再深入分析亞洲中的東協十國。兩張圖表皆為 Highcharts 互動圓餅圖。單位：人次。</p>
   </header>
+  <nav class="page-nav" aria-label="網頁章節導覽"><a href="#continents">01 五大洲來源地區</a><a href="#asean">02 東協十國國籍別</a><a href="#data-sources">資料與統計說明</a></nav>
+  <div class="feature-heading"><span class="feature-number">01</span><div><h2>五大洲來臺旅客來源地區分布</h2><p>保留原本五大洲互動圓餅圖，另列「其他未列明」以維持 Excel 總計一致。</p></div></div>
 
   <section class="stats" aria-label="旅客統計重點">
     <div class="stat"><span class="label">12 個月來臺旅客總計</span><div class="value">6,900,434</div><small>2025/10 — 2026/09 · 人次</small></div>
@@ -162,7 +201,7 @@
     <span class="region-count">788 人次</span>
   </li>
       </ol>
-      <p class="breakdown-foot">六個來源地區的總人次合計：6,900,434，與 Excel 的總計欄一致。</p>
+      <p class="breakdown-foot">五大洲加上「其他未列明」的總人次為 6,900,434，與 Excel 的總計欄一致。</p>
     </aside>
   </section>
 
@@ -223,129 +262,263 @@
     </div>
   </details>
 
-  <footer class="notes">
-    <p><strong>資料依據：</strong>使用者提供的 <code>來臺旅客按國籍統計.xlsx</code>，工作表「來臺旅客按國籍統計」，民國 114 年 10 月至 115 年 9 月的逐月數據。此頁未另外查證 Excel 的原始發布機關。</p>
-    <p><strong>分類提醒：</strong>原表以「亞洲、非洲、美洲、大洋洲、歐洲、其他未列明」分類，實際上是<strong>按來源地區</strong>彙整，並沒有細分到日本、美國等單一國籍，因此圓餅圖不會自行補出個別國家數字。</p>
-    <p><strong>資料查核：</strong>各月份的地區小計與當月總計、全部月份的加總與 Excel 總計皆一致；比例由實際人次計算並顯示至小數點後兩位。</p>
-    <p><strong>開啟方式：</strong>此檔案已包含所有自製 HTML、CSS、JavaScript 與 Excel 數據；請連線以載入 Highcharts 官方程式庫。圓餅圖僅由 Highcharts 動態繪製，不提供靜態替代圖；若網路無法載入，仍可查看下方的 Excel 原始數字表與分析文稿。</p>
+
+  <section class="asean-section" id="asean" aria-labelledby="asean-section-title">
+    <div class="feature-heading"><span class="feature-number">02</span><div><h2 id="asean-section-title">東協十國來臺旅客國籍別分析</h2><p>2025 年 10 月至 2026 年 9 月｜同一期間、從亞洲旅客進一步細分至十個國家</p></div></div>
+    <p class="asean-intro">這一部分使用你新提供的「東協十國」Excel，與上方五大洲圖表並列在<strong>同一個網頁</strong>。可選擇全年或單一月份，圓餅圖、國籍排名與數字會同步變化。</p>
+    <p class="asean-context"><strong>統計關係：</strong>東協十國 2,698,569 人次是上方「亞洲地區」5,280,306 人次的一部分，占亞洲來源旅客 <strong>51.11%</strong>，約占全部來臺旅客 <strong>39.11%</strong>。這兩份資料是不同層級的拆分，<strong>不能直接相加</strong>。</p>
+  <section class="stats asean-stats" aria-label="東協十國來臺旅客統計重點">
+    <div class="stat"><span class="label" id="kpi-total-label">東協十國 12 個月合計</span><div class="value" id="kpi-total">2,698,569</div><small id="kpi-total-note">2025/10 – 2026/09 · 人次</small></div>
+    <div class="stat"><span class="label">第一大來源國</span><div class="value" id="kpi-country">菲律賓</div><small id="kpi-country-note">741,033 人次 · 27.46%</small></div>
+    <div class="stat"><span class="label">前三大來源國合計占比</span><div class="value" id="kpi-top3">59.84%</div><small id="kpi-top3-note">1,614,808 人次</small></div>
+    <div class="stat"><span class="label">12 個月最高月份</span><div class="value">2026/03</div><small>304,315 人次</small></div>
+  </section>
+  <section class="toolbar" aria-label="圖表統計期間切換">
+    <div><div class="toolbar-title">切換統計月份，查看十國比例變化</div><p>選擇完整期間或單月，圓餅圖、排名與上方統計卡片會同步更新。</p></div>
+    <div class="toolbar-controls"><label for="period-select">統計期間</label>
+      <select id="period-select"><option value="all">2025/10–2026/09｜全年合計</option>
+        <option value="0">2025/10</option>
+        <option value="1">2025/11</option>
+        <option value="2">2025/12</option>
+        <option value="3">2026/01</option>
+        <option value="4">2026/02</option>
+        <option value="5">2026/03</option>
+        <option value="6">2026/04</option>
+        <option value="7">2026/05</option>
+        <option value="8">2026/06</option>
+        <option value="9">2026/07</option>
+        <option value="10">2026/08</option>
+        <option value="11">2026/09</option>
+      </select><button type="button" id="reset-button">還原完整期間</button></div>
+  </section>
+  <section class="primary-grid" aria-label="東協十國來臺旅客圓餅圖及排名">
+    <article class="chart-card">
+      <figure class="highcharts-figure">
+        <div id="container-asean" role="img" aria-label="使用 Highcharts 製作的東協十國來臺旅客互動圓餅圖"><div class="chart-loading">正在載入 Highcharts 互動圓餅圖…</div></div>
+        <figcaption class="chart-caption">將滑鼠移到扇形上，即可查看<strong>國家、人次與占比</strong>；也能點選扇形突顯國家，或從右側排名選取。圖表右上角可下載圖片與數據。比例以當前選取期間計算。</figcaption>
+      </figure>
+    </article>
+    <aside class="breakdown-card" aria-labelledby="ranking-title">
+      <p class="eyebrow">NATIONALITY BREAKDOWN</p>
+      <h2 id="ranking-title">東協十國占比排名</h2>
+      <p class="panel-subtitle" id="ranking-period">2025/10–2026/09 · 由高到低排列</p>
+      <ol id="ranking-list" class="ranking-list" aria-label="十個國家及其旅客占比"></ol>
+      <p class="breakdown-foot" id="ranking-foot">十國合計與 Excel 小計一致。點選國家可在 Highcharts 圓餅圖上突顯。</p>
+    </aside>
+  </section>
+  <section class="analysis-card" aria-labelledby="asean-analysis-title">
+    <div class="section-heading"><div><p class="eyebrow">DATA INSIGHTS</p><h2 id="asean-analysis-title">東協十國來臺旅客數據分析</h2></div><span class="heading-period">完整期間 · 2025.10 — 2026.09</span></div>
+    <div class="analysis-content">
+      <div class="analysis-block"><span class="index-mark">01</span><div><h3>菲律賓來臺人次最多</h3><p>從這 12 個月的統計來看，東協十國來臺旅客合計 <strong>2,698,569 人次</strong>，其中菲律賓就有 <strong>741,033 人次</strong>，占 <strong>27.46%</strong>，是十國當中最多的來源國。也就是說，這段時間每 100 位來自東協十國的旅客，大約有 27 位來自菲律賓。</p></div></div>
+      <div class="analysis-block"><span class="index-mark">02</span><div><h3>越南、泰國緊接在後</h3><p>第二名是越南，累計 <strong>465,626 人次（17.25%）</strong>；第三名是泰國，共 <strong>408,149 人次（15.12%）</strong>。將菲律賓、越南與泰國加在一起，共有 <strong>1,614,808 人次，占 59.84%</strong>，代表十國來臺旅客有將近六成集中在這三個國家。</p></div></div>
+      <div class="analysis-block"><span class="index-mark">03</span><div><h3>馬來西亞、新加坡、印尼也有一定比重</h3><p>馬來西亞有 <strong>395,233 人次（14.65%）</strong>，新加坡有 <strong>388,078 人次（14.38%）</strong>，印尼則有 <strong>264,993 人次（9.82%）</strong>。前六個國家合計占 <strong>98.69%</strong>；緬甸、柬埔寨、汶萊與寮國的占比相對較小。</p></div></div>
+      <div class="analysis-block"><span class="index-mark">04</span><div><h3>單月人次以 2026 年 3 月最高</h3><p>如果改看每月小計，<strong>2026/03 有 304,315 人次</strong>，是這 12 個月當中最高的月份；而 <strong>2026/08 為 179,769 人次</strong>，是最低的月份。可以用上方的月份選單，觀察不同月份中各國的比例是否相同。</p></div></div>
+    </div>
+    <p class="analysis-conclusion"><strong>整體觀察：</strong>東協十國的來臺旅客人次並不是平均分布，主要集中在菲律賓、越南、泰國等國家。不過，這份資料只能呈現國籍占比與月份差異，不能單靠這張圖判定差異原因，也不能直接推論長期成長趨勢。</p>
+  </section>
+  <details class="details" aria-label="東協十國逐月來臺旅客數據">
+    <summary>查看 2025/10–2026/09 東協十國原始人次表（12 個月份）</summary>
+    <p class="details-note">依 Excel 的每月數據直接列出。國籍順序與原始表相同，所有民國年份已轉為西元年；左右捲動可查看完整欄位。</p>
+    <div class="scroll-table"><table>
+      <thead><tr><th scope="col">西元年月</th><th scope="col">越南</th><th scope="col">泰國</th><th scope="col">馬來西亞</th><th scope="col">新加坡</th><th scope="col">菲律賓</th><th scope="col">汶萊</th><th scope="col">印尼</th><th scope="col">柬埔寨</th><th scope="col">寮國</th><th scope="col">緬甸</th><th scope="col">東協十國小計</th></tr></thead>
+      <tbody>
+        <tr><th scope="row">2025/10</th><td>36,493</td><td>39,290</td><td>36,583</td><td>33,728</td><td>54,040</td><td>178</td><td>18,742</td><td>679</td><td>113</td><td>1,536</td><td><strong>221,382</strong></td></tr>
+        <tr><th scope="row">2025/11</th><td>30,321</td><td>35,371</td><td>40,223</td><td>52,015</td><td>57,469</td><td>341</td><td>18,675</td><td>1,214</td><td>121</td><td>1,399</td><td><strong>237,149</strong></td></tr>
+        <tr><th scope="row">2025/12</th><td>32,625</td><td>47,858</td><td>49,463</td><td>66,271</td><td>72,038</td><td>473</td><td>23,613</td><td>1,038</td><td>107</td><td>1,703</td><td><strong>295,189</strong></td></tr>
+        <tr><th scope="row">2026/01</th><td>31,276</td><td>32,989</td><td>30,989</td><td>29,025</td><td>70,388</td><td>137</td><td>19,307</td><td>756</td><td>60</td><td>1,410</td><td><strong>216,337</strong></td></tr>
+        <tr><th scope="row">2026/02</th><td>41,074</td><td>26,616</td><td>29,022</td><td>18,017</td><td>63,190</td><td>76</td><td>18,038</td><td>608</td><td>82</td><td>1,495</td><td><strong>198,218</strong></td></tr>
+        <tr><th scope="row">2026/03</th><td>57,612</td><td>45,523</td><td>46,518</td><td>41,605</td><td>81,044</td><td>287</td><td>28,885</td><td>1,044</td><td>86</td><td>1,711</td><td><strong>304,315</strong></td></tr>
+        <tr><th scope="row">2026/04</th><td>36,791</td><td>42,640</td><td>33,637</td><td>33,247</td><td>74,225</td><td>150</td><td>23,277</td><td>1,328</td><td>114</td><td>1,807</td><td><strong>247,216</strong></td></tr>
+        <tr><th scope="row">2026/05</th><td>35,218</td><td>34,874</td><td>35,372</td><td>30,881</td><td>64,364</td><td>161</td><td>20,686</td><td>1,055</td><td>59</td><td>1,472</td><td><strong>224,142</strong></td></tr>
+        <tr><th scope="row">2026/06</th><td>40,182</td><td>26,010</td><td>24,357</td><td>27,312</td><td>56,737</td><td>233</td><td>24,194</td><td>1,112</td><td>44</td><td>1,504</td><td><strong>201,685</strong></td></tr>
+        <tr><th scope="row">2026/07</th><td>41,457</td><td>28,460</td><td>21,470</td><td>17,962</td><td>51,017</td><td>107</td><td>21,168</td><td>1,216</td><td>55</td><td>2,075</td><td><strong>184,987</strong></td></tr>
+        <tr><th scope="row">2026/08</th><td>43,617</td><td>22,656</td><td>23,078</td><td>16,446</td><td>47,420</td><td>123</td><td>23,339</td><td>663</td><td>51</td><td>2,376</td><td><strong>179,769</strong></td></tr>
+        <tr><th scope="row">2026/09</th><td>38,960</td><td>25,862</td><td>24,521</td><td>21,569</td><td>49,101</td><td>119</td><td>25,069</td><td>537</td><td>75</td><td>2,367</td><td><strong>188,180</strong></td></tr>
+      </tbody><tfoot><tr><th scope="row">12 個月總計</th><td>465,626</td><td>408,149</td><td>395,233</td><td>388,078</td><td>741,033</td><td>2,385</td><td>264,993</td><td>11,250</td><td>967</td><td>20,855</td><td>2,698,569</td></tr></tfoot>
+    </table></div>
+  </details>
+  </section>
+
+  <footer class="notes" id="data-sources">
+    <p><strong>資料來源（五大洲）：</strong>上傳 Excel <code>來臺旅客按國籍統計.xlsx</code>，工作表「來臺旅客按國籍統計」，2025/10–2026/09。五大洲（亞洲、非洲、美洲、大洋洲、歐洲）另有「其他未列明」分類，因而原圖有六個扇形；其加總與 Excel 的 6,900,434 人次一致。</p>
+    <p><strong>資料來源（東協十國）：</strong>上傳 Excel <code>來臺旅客按國籍統計東協十國(1).xlsx</code>，工作表「來臺旅客按國籍統計」，2025/10–2026/09。十國合計 2,698,569 人次；每月小計、國別小計和完整期間總計均與 Excel 一致。</p>
+    <p><strong>統計說明：</strong>兩張圓餅圖的占比各以自己的母體計算。五大洲圖以全部 6,900,434 人次為分母；東協圖以十國 2,698,569 人次（或所選月份小計）為分母。東協十國屬於亞洲地區，不是額外新增的旅客。</p>
+    <p><strong>資料查核界線：</strong>本頁只使用你提供的 Excel 內容，沒有自行估計或補數據，也沒有獨立確認兩份 Excel 的官方原始發布機關。民國 114／115 年統一改為西元 2025／2026 年。</p>
+    <p><strong>使用說明：</strong>版面 CSS、應用程式 JavaScript 與兩份 Excel 數據都內嵌在這一個 HTML 檔案中。兩張圓餅圖皆由 Highcharts <code>type: 'pie'</code> 真正繪製；開啟網頁時需要網路載入 Highcharts 官方程式庫（不使用靜態圖片或 CSS 圓餅圖替代）。可從各圖表右上角選單下載圖片或數據。</p>
   </footer>
 </main>
-
 <script>
-  'use strict';
-  // 圖表數字直接取自上傳 Excel 的 12 個月份合計，沒有任何推估。
-  const regionData = [{"name":"亞洲地區","y":5280306,"color":"#2878dc"},{"name":"美洲地區","y":959459,"color":"#ef8750"},{"name":"歐洲地區","y":489079,"color":"#13a891"},{"name":"大洋洲地區","y":156637,"color":"#808dc7"},{"name":"非洲地區","y":14165,"color":"#e6b85c"},{"name":"其他未列明","y":788,"color":"#9aaaba"}];
-  const totalArrivals = 6900434;
+'use strict';
+// 所有資料直接讀取並核對於上傳 Excel。兩張圖共用一套 Highcharts 載入器。
+const regionData = [{"name":"亞洲地區","y":5280306,"color":"#2878dc"},{"name":"美洲地區","y":959459,"color":"#ef8750"},{"name":"歐洲地區","y":489079,"color":"#13a891"},{"name":"大洋洲地區","y":156637,"color":"#808dc7"},{"name":"非洲地區","y":14165,"color":"#e6b85c"},{"name":"其他未列明","y":788,"color":"#9aaaba"}];
+const totalArrivals = 6900434;
+const countries = [{"name":"越南","total":465626,"color":"#ef8750"},{"name":"泰國","total":408149,"color":"#10a89a"},{"name":"馬來西亞","total":395233,"color":"#8977cf"},{"name":"新加坡","total":388078,"color":"#ea7997"},{"name":"菲律賓","total":741033,"color":"#2878dc"},{"name":"汶萊","total":2385,"color":"#99aaba"},{"name":"印尼","total":264993,"color":"#d7ac39"},{"name":"柬埔寨","total":11250,"color":"#8cae70"},{"name":"寮國","total":967,"color":"#bd9274"},{"name":"緬甸","total":20855,"color":"#5b8aa9"}];
+const months = [{"label":"2025/10","values":[36493,39290,36583,33728,54040,178,18742,679,113,1536],"total":221382},{"label":"2025/11","values":[30321,35371,40223,52015,57469,341,18675,1214,121,1399],"total":237149},{"label":"2025/12","values":[32625,47858,49463,66271,72038,473,23613,1038,107,1703],"total":295189},{"label":"2026/01","values":[31276,32989,30989,29025,70388,137,19307,756,60,1410],"total":216337},{"label":"2026/02","values":[41074,26616,29022,18017,63190,76,18038,608,82,1495],"total":198218},{"label":"2026/03","values":[57612,45523,46518,41605,81044,287,28885,1044,86,1711],"total":304315},{"label":"2026/04","values":[36791,42640,33637,33247,74225,150,23277,1328,114,1807],"total":247216},{"label":"2026/05","values":[35218,34874,35372,30881,64364,161,20686,1055,59,1472],"total":224142},{"label":"2026/06","values":[40182,26010,24357,27312,56737,233,24194,1112,44,1504],"total":201685},{"label":"2026/07","values":[41457,28460,21470,17962,51017,107,21168,1216,55,2075],"total":184987},{"label":"2026/08","values":[43617,22656,23078,16446,47420,123,23339,663,51,2376],"total":179769},{"label":"2026/09","values":[38960,25862,24521,21569,49101,119,25069,537,75,2367],"total":188180}];
+const aseanTotal = 2698569;
+const number = n => Number(n).toLocaleString('en-US');
+const percentage = (n,total) => total ? (n / total * 100).toFixed(2) + '%' : '0.00%';
+let regionChart = null;
+let aseanChart = null;
+const selectedPeriod = document.getElementById('period-select');
+const rankingList = document.getElementById('ranking-list');
+const chartTarget = document.getElementById('container-asean');
 
-  // 僅載入真正的 Highcharts 官方程式庫，並提供備援 CDN。
-  // 不使用 CSS conic-gradient、Canvas 仿製或 SVG 靜態圖片繪製圓餅圖。
-  const vendors = [
-    'https://code.highcharts.com',
-    'https://cdn.jsdelivr.net/npm/highcharts@12',
-    'https://unpkg.com/highcharts@12'
-  ];
-  const chartContainer = document.getElementById('container');
-
-  function loadExternalScript(url) {
-    return new Promise((resolve, reject) => {
-      const node = document.createElement('script');
-      let done = false;
-      node.src = url;
-      node.async = false;
-      node.onload = () => { if (done) return; done = true; clearTimeout(timer); resolve(); };
-      node.onerror = () => { if (done) return; done = true; clearTimeout(timer); node.remove(); reject(new Error('Unable to load ' + url)); };
-      const timer = setTimeout(() => {
-        if (done) return;
-        done = true;
-        node.remove();
-        reject(new Error('Timed out: ' + url));
-      }, 10000);
-      document.head.appendChild(node);
-    });
+function getSnapshot(){
+  const key=selectedPeriod.value;
+  if(key==='all')return {label:'2025/10–2026/09（12 個月合計）',values:countries.map(c=>c.total),total:aseanTotal};
+  const month=months[Number(key)];
+  return {label:month.label,values:month.values.slice(),total:month.total};
+}
+function getRanking(snap){
+  return countries.map((c,i)=>({...c,y:snap.values[i]})).sort((a,b)=>b.y-a.y);
+}
+function fillSummary(snap,ranking){
+  const isAll=selectedPeriod.value==='all';
+  document.getElementById('kpi-total-label').textContent=isAll?'東協十國 12 個月合計':'東協十國單月合計';
+  document.getElementById('kpi-total').textContent=number(snap.total);
+  document.getElementById('kpi-total-note').textContent=snap.label+' · 人次';
+  document.getElementById('kpi-country').textContent=ranking[0].name;
+  document.getElementById('kpi-country-note').textContent=number(ranking[0].y)+' 人次 · '+percentage(ranking[0].y,snap.total);
+  const top3=ranking.slice(0,3).reduce((s,item)=>s+item.y,0);
+  document.getElementById('kpi-top3').textContent=percentage(top3,snap.total);
+  document.getElementById('kpi-top3-note').textContent=number(top3)+' 人次';
+  document.getElementById('ranking-period').textContent=snap.label+' · 由高到低排列';
+  document.getElementById('ranking-foot').textContent='目前選取期間：'+snap.label+'；十國合計 '+number(snap.total)+' 人次。點選國家可以在圓餅圖突顯。';
+}
+function highlightCountry(name){
+  if(!aseanChart||!aseanChart.series[0])return;
+  const point=aseanChart.series[0].points.find(p=>p.name===name);
+  if(!point)return;
+  const active=!point.sliced;
+  aseanChart.series[0].points.forEach(p=>{
+    if(p!==point&&p.sliced){p.slice(false,false);p.select(false,false);}
+  });
+  point.slice(active,true);
+  point.select(active,false);
+  if(active)chartTarget.scrollIntoView({behavior:'smooth',block:'center'});
+}
+function fillRanking(snap,ranking){
+  rankingList.replaceChildren();
+  for(const [index,item] of ranking.entries()){
+    const li=document.createElement('li');
+    const button=document.createElement('button');
+    button.type='button';button.className='rank-button';
+    button.setAttribute('aria-label','查看 '+item.name+'：'+number(item.y)+' 人次，占 '+percentage(item.y,snap.total));
+    const head=document.createElement('div');head.className='rank-head';
+    const country=document.createElement('span');country.className='rank-name';
+    const rank=document.createElement('span');rank.className='rank-num';rank.textContent=String(index+1).padStart(2,'0');
+    const dot=document.createElement('i');dot.className='rank-dot';dot.style.background=item.color;
+    const nameEl=document.createElement('span');nameEl.textContent=item.name;
+    country.append(rank,dot,nameEl);
+    const share=document.createElement('strong');share.className='rank-percent';share.textContent=percentage(item.y,snap.total);
+    head.append(country,share);
+    const bar=document.createElement('div');bar.className='bar-track';bar.setAttribute('aria-hidden','true');
+    const fill=document.createElement('div');fill.className='bar-fill';fill.style.width=(item.y/snap.total*100)+'%';fill.style.background=item.color;
+    bar.appendChild(fill);
+    const count=document.createElement('div');count.className='rank-count';count.textContent=number(item.y)+' 人次';
+    button.append(head,bar,count);li.appendChild(button);rankingList.appendChild(li);
+    button.addEventListener('click',()=>highlightCountry(item.name));
   }
-
-  async function loadFromCDNs(path) {
-    for (const base of vendors) {
-      try { await loadExternalScript(base + '/' + path); return; }
-      catch (error) { console.warn('Highcharts CDN unavailable:', error.message); }
-    }
-    throw new Error('All Highcharts CDNs failed for: ' + path);
+}
+function chartData(ranking){return ranking.map(c=>({name:c.name,y:c.y,color:c.color}));}
+function updateASEAN(){
+  const snap=getSnapshot(),ranking=getRanking(snap);
+  fillSummary(snap,ranking);fillRanking(snap,ranking);
+  if(aseanChart){
+    aseanChart.series[0].setData(chartData(ranking),true,{duration:350});
+    aseanChart.setTitle(null,{text:snap.label+'｜單位：人次'});
+    aseanChart.update({exporting:{filename:'Taiwan_ASEAN10_Arrivals_'+(selectedPeriod.value==='all'?'2025-10_to_2026-09':snap.label.replace('/','-'))}},false);
   }
+}
+selectedPeriod.addEventListener('change',updateASEAN);
+document.getElementById('reset-button').addEventListener('click',()=>{selectedPeriod.value='all';updateASEAN();});
+updateASEAN(); // 圖表程式尚未載入時，文字排名仍可操作。
 
-  (async function initHighchartsPie() {
-    try {
-      if (!window.Highcharts || typeof window.Highcharts.chart !== 'function') {
-        await loadFromCDNs('highcharts.js');
-      }
-      if (!window.Highcharts || typeof window.Highcharts.chart !== 'function') {
-        throw new Error('Highcharts was not initialized');
-      }
-
-      // 官網範例的 exporting/export-data/accessibility 模組，僅在網路可用時啟用。
-      for (const module of ['modules/exporting.js','modules/export-data.js','modules/accessibility.js']) {
-        try { await loadFromCDNs(module); }
-        catch (error) { console.warn('Optional Highcharts module unavailable:', module); }
-      }
-
-      // 使用官網 Highcharts.chart('container', {...}) API 產生真正的互動 pie chart。
-          Highcharts.setOptions({
-      lang: {
-        thousandsSep: ',', decimalPoint: '.',
-        contextButtonTitle: '圖表下載與資料選單',
-        downloadPNG: '下載 PNG 圖片', downloadJPEG: '下載 JPEG 圖片',
-        downloadPDF: '下載 PDF', downloadSVG: '下載 SVG 向量圖',
-        downloadCSV: '下載 CSV 數據', downloadXLS: '下載 XLS 數據',
-        viewData: '檢視資料表', hideData: '隱藏資料表', printChart: '列印圖表'
-      }
-    });
-    window.arrivalsPieChart = Highcharts.chart('container', {
-      chart: {
-        type:'pie', backgroundColor:'#ffffff', spacingTop:14, spacingBottom:11,
-        style:{fontFamily:'-apple-system,BlinkMacSystemFont,"Segoe UI","Noto Sans TC",Arial,sans-serif'}
-      },
-      title:{text:'來臺旅客按來源地區分布',align:'left',style:{color:'#19314a',fontSize:'19px',fontWeight:'700'}},
-      subtitle:{text:'2025 年 10 月 – 2026 年 9 月｜單位：人次',align:'left',style:{color:'#66758a',fontSize:'12px'}},
-      credits:{enabled:true},
-      tooltip:{
-        useHTML:true, backgroundColor:'#fff', borderColor:'#dae5f2', borderRadius:9,
-        formatter:function(){
-          return '<div style="padding:5px 4px;color:#19314a;min-width:150px">'+
-            '<div style="font-weight:700;margin-bottom:6px"><span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:'+this.point.color+';margin-right:7px"></span>'+this.point.name+'</div>'+
-            '<div>旅客人次：<b>'+Highcharts.numberFormat(this.y,0,'.',',')+'</b></div>'+
-            '<div>占比：<b>'+Highcharts.numberFormat(this.percentage,2,'.',',')+'%</b></div></div>';
-        }
-      },
-      legend:{enabled:true,align:'center',verticalAlign:'bottom',itemStyle:{color:'#38536d',fontSize:'12px',fontWeight:'500'}},
-      plotOptions:{
-        pie:{
-          allowPointSelect:true,cursor:'pointer',slicedOffset:10,borderColor:'#ffffff',borderWidth:2,
-          innerSize:0,size:'80%',center:['50%','52%'],
-          showInLegend:true,animation:{duration:650},
-          dataLabels:[
-            {enabled:true,format:'{point.name}',distance:16,softConnector:true,connectorColor:'#9cabbc',
-              style:{color:'#304861',fontSize:'12px',fontWeight:'550',textOutline:'none'}},
-            {enabled:true,format:'{point.percentage:.1f}%',distance:-37,
-              filter:{property:'percentage',operator:'>',value:6},
-              style:{color:'#ffffff',fontSize:'13px',fontWeight:'700',textOutline:'none'}}
-          ]
-        }
-      },
-      series:[{name:'來臺旅客',type:'pie',colorByPoint:false,data:regionData}],
-      exporting:{enabled:true,filename:'Inbound_Taiwan_Regions_2025-10_to_2026-09',chartOptions:{chart:{backgroundColor:'#fff'}}},
-      responsive:{rules:[{condition:{maxWidth:580},chartOptions:{
-        title:{style:{fontSize:'16px'}},subtitle:{style:{fontSize:'10px'}},
-        plotOptions:{pie:{size:'76%',dataLabels:[
-          {enabled:true,format:'{point.name}',distance:9,style:{color:'#304861',fontSize:'10px',fontWeight:'500',textOutline:'none'}},
-          {enabled:true,format:'{point.percentage:.0f}%',distance:-26,filter:{property:'percentage',operator:'>',value:6},style:{color:'#ffffff',fontSize:'11px',fontWeight:'700',textOutline:'none'}}
-        ]}}
-      }}]},
-      accessibility:{description:'2025年10月至2026年9月來臺旅客共6900434人次。亞洲占76.52%，美洲13.90%，歐洲7.09%，大洋洲2.27%，非洲0.21%，其他未列明0.01%。'}
-    });
-    } catch (error) {
-      console.error('Could not initialize Highcharts pie chart:', error);
-      chartContainer.innerHTML = '<div class="highcharts-loading error" role="alert">無法載入 Highcharts 圓餅圖。請確認網路連線並重新整理頁面。這個網頁不使用靜態圖片或 CSS 取代 Highcharts；下方 Excel 數據與分析仍可正常閱讀。</div>';
+const vendors=['https://code.highcharts.com','https://cdn.jsdelivr.net/npm/highcharts@12','https://unpkg.com/highcharts@12'];
+function loadScript(url){
+  return new Promise((resolve,reject)=>{
+    const s=document.createElement('script');let finished=false;
+    s.src=url;s.async=false;
+    const timer=setTimeout(()=>{if(finished)return;finished=true;s.remove();reject(new Error('載入逾時：'+url));},9000);
+    s.onload=()=>{if(finished)return;finished=true;clearTimeout(timer);resolve();};
+    s.onerror=()=>{if(finished)return;finished=true;clearTimeout(timer);s.remove();reject(new Error('無法載入：'+url));};
+    document.head.appendChild(s);
+  });
+}
+async function loadHighcharts(path){
+  for(const base of vendors){
+    try{await loadScript(base+'/'+path);return;}
+    catch(e){console.warn(e.message);}
+  }
+  throw new Error('無法從可用站點載入 '+path);
+}
+function commonChartStyle(){return {fontFamily:'-apple-system,BlinkMacSystemFont,"Segoe UI","Noto Sans TC",Arial,sans-serif'};}
+function makeRegionChart(){
+  regionChart=Highcharts.chart('container',{
+    chart:{type:'pie',backgroundColor:'#ffffff',spacingTop:14,spacingBottom:11,style:commonChartStyle()},
+    title:{text:'來臺旅客按五大洲來源地區分布',align:'left',style:{color:'#19314a',fontSize:'19px',fontWeight:'700'}},
+    subtitle:{text:'五大洲＋其他未列明｜2025 年 10 月 – 2026 年 9 月｜單位：人次',align:'left',style:{color:'#66758a',fontSize:'12px'}},
+    credits:{enabled:true},
+    tooltip:{useHTML:true,backgroundColor:'#ffffff',borderColor:'#dae5f2',borderRadius:9,formatter:function(){
+      return '<div style="padding:5px 4px;color:#19314a;min-width:150px"><div style="font-weight:700;margin-bottom:6px">'+this.point.name+'</div><div>旅客人次：<b>'+Highcharts.numberFormat(this.y,0,'.',',')+'</b></div><div>占全部旅客：<b>'+Highcharts.numberFormat(this.percentage,2,'.',',')+'%</b></div></div>';
+    }},
+    legend:{enabled:true,align:'center',verticalAlign:'bottom',itemStyle:{color:'#38536d',fontSize:'12px',fontWeight:'500'}},
+    plotOptions:{pie:{allowPointSelect:true,cursor:'pointer',slicedOffset:10,borderColor:'#ffffff',borderWidth:2,innerSize:0,size:'80%',center:['50%','52%'],showInLegend:true,animation:{duration:650},dataLabels:[
+      {enabled:true,format:'{point.name}',distance:16,softConnector:true,connectorColor:'#9cabbc',style:{color:'#304861',fontSize:'12px',fontWeight:'550',textOutline:'none'}},
+      {enabled:true,format:'{point.percentage:.1f}%',distance:-37,filter:{property:'percentage',operator:'>',value:6},style:{color:'#ffffff',fontSize:'13px',fontWeight:'700',textOutline:'none'}}
+    ]}},
+    series:[{name:'來臺旅客',type:'pie',colorByPoint:false,data:regionData}],
+    exporting:{enabled:true,filename:'Inbound_Taiwan_Continents_2025-10_to_2026-09',chartOptions:{chart:{backgroundColor:'#fff'}}},
+    responsive:{rules:[{condition:{maxWidth:580},chartOptions:{title:{style:{fontSize:'16px'}},subtitle:{style:{fontSize:'10px'}},plotOptions:{pie:{size:'76%',dataLabels:[
+      {enabled:true,format:'{point.name}',distance:9,style:{color:'#304861',fontSize:'10px',fontWeight:'500',textOutline:'none'}},
+      {enabled:true,format:'{point.percentage:.0f}%',distance:-26,filter:{property:'percentage',operator:'>',value:6},style:{color:'#ffffff',fontSize:'11px',fontWeight:'700',textOutline:'none'}}
+    ]}}}}]},
+    accessibility:{description:'2025年10月至2026年9月，來臺旅客共6900434人次。五大洲來源地區另列其他未列明，以維持總計一致。'}
+  });
+  window.arrivalsPieChart=regionChart;
+}
+function makeASEANChart(){
+  const initial=getSnapshot();
+  aseanChart=Highcharts.chart('container-asean',{
+    chart:{type:'pie',backgroundColor:'#ffffff',spacingTop:16,spacingBottom:12,style:commonChartStyle()},
+    title:{text:'東協十國來臺旅客國籍別占比',align:'left',style:{color:'#19314a',fontSize:'19px',fontWeight:'700'}},
+    subtitle:{text:initial.label+'｜單位：人次',align:'left',style:{color:'#66758a',fontSize:'12px'}},
+    credits:{enabled:true},
+    tooltip:{useHTML:true,backgroundColor:'#ffffff',borderColor:'#dae5f2',borderRadius:9,formatter:function(){
+      return '<div style="color:#19314a;padding:5px 4px;min-width:150px"><div style="font-weight:700;margin-bottom:6px">'+this.point.name+'</div><div>旅客人次：<b>'+Highcharts.numberFormat(this.y,0,'.',',')+'</b></div><div>十國內占比：<b>'+Highcharts.numberFormat(this.percentage,2,'.',',')+'%</b></div></div>';
+    }},
+    legend:{enabled:false},
+    plotOptions:{pie:{allowPointSelect:true,cursor:'pointer',slicedOffset:13,borderColor:'#ffffff',borderWidth:2,showInLegend:false,animation:{duration:450},size:'85%',center:['50%','51%'],dataLabels:[
+      {enabled:true,format:'{point.name}',distance:18,softConnector:true,connectorColor:'#a0aec0',filter:{property:'percentage',operator:'>',value:1.1},style:{color:'#304861',fontSize:'12px',fontWeight:'600',textOutline:'none'}},
+      {enabled:true,format:'{point.percentage:.1f}%',distance:-34,filter:{property:'percentage',operator:'>',value:9},style:{color:'#ffffff',fontSize:'12px',fontWeight:'700',textOutline:'none'}}
+    ]}},
+    series:[{name:'東協十國旅客人次',type:'pie',colorByPoint:false,data:chartData(getRanking(initial))}],
+    exporting:{enabled:true,filename:'Taiwan_ASEAN10_Arrivals_2025-10_to_2026-09',chartOptions:{chart:{backgroundColor:'#fff'}}},
+    responsive:{rules:[{condition:{maxWidth:550},chartOptions:{title:{style:{fontSize:'16px'}},subtitle:{style:{fontSize:'10px'}},plotOptions:{pie:{size:'78%',dataLabels:[
+      {enabled:true,format:'{point.name}',distance:10,filter:{property:'percentage',operator:'>',value:3},style:{fontSize:'10px',color:'#304861',textOutline:'none'}},
+      {enabled:true,format:'{point.percentage:.0f}%',distance:-25,filter:{property:'percentage',operator:'>',value:11},style:{color:'#fff',fontSize:'10px',fontWeight:'700',textOutline:'none'}}
+    ]}}}}]},
+    accessibility:{description:'2025年10月至2026年9月來臺旅客按東協十國國籍別的統計，可切換月份並查看各國人次。'}
+  });
+  window.arrivalsASEANPieChart=aseanChart;
+  updateASEAN();
+}
+(async function initialize(){
+  try{
+    if(!window.Highcharts||typeof window.Highcharts.chart!=='function')await loadHighcharts('highcharts.js');
+    if(!window.Highcharts||typeof window.Highcharts.chart!=='function')throw new Error('Highcharts 無法初始化');
+    for(const module of ['modules/exporting.js','modules/export-data.js','modules/accessibility.js']){
+      try{await loadHighcharts(module);}catch(error){console.warn('可選模組未載入',error.message);}
     }
-  })();
+    Highcharts.setOptions({lang:{thousandsSep:',',decimalPoint:'.',contextButtonTitle:'下載或檢視圖表資料',downloadPNG:'下載 PNG 圖片',downloadJPEG:'下載 JPEG 圖片',downloadSVG:'下載 SVG 圖片',downloadCSV:'下載 CSV 數據',downloadXLS:'下載 XLS 數據',viewData:'檢視資料表',hideData:'隱藏資料表',printChart:'列印圖表'}});
+    try{makeRegionChart();}catch(error){console.error('五大洲圖表初始化失敗',error);document.getElementById('container').innerHTML='<div class="highcharts-loading error" role="alert">五大洲互動圓餅圖無法顯示，請確認網路連線並重新整理。</div>';}
+    try{makeASEANChart();}catch(error){console.error('東協十國圖表初始化失敗',error);chartTarget.innerHTML='<div class="chart-loading error" role="alert">東協十國互動圓餅圖無法顯示，請確認網路連線並重新整理。</div>';}
+  }catch(error){
+    console.error('Highcharts 載入失敗',error);
+    document.getElementById('container').innerHTML='<div class="highcharts-loading error" role="alert">無法載入 Highcharts 互動圖表，請確認網路連線並重新整理。下方原始數據及分析文稿仍可查看。</div>';
+    chartTarget.innerHTML='<div class="chart-loading error" role="alert">無法載入 Highcharts 互動圖表，請確認網路連線並重新整理。</div>';
+  }
+})();
 </script>
 </body>
 </html>
